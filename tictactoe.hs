@@ -3,27 +3,35 @@ data Position = TL | TM | TR | ML | MM | MR | BL | BM | BR
 data Player = One | Two 
     deriving (Eq, Show)
 type Move = (Player, Position)
-data Game = Unfinished [Move] | Finished [Move] 
-    deriving Show
+data Unfinished = Unfinished [Move] deriving Show
+data Finished = Finished [Move] deriving Show
+-- this Either is so that move can
+-- return a potentially finished game
+type Game = Either Unfinished Finished
 
+winningPatterns :: [[Position]]
 winningPatterns = [[TL,TM, TR], [ML, MM, MR], [BL, BM, BR], 
     [TL, ML, BL], [TM, MM, BM], [TR, MR, BR], [TL, MM, BR],
     [TR, MM, BL]]
 
-newGame = Unfinished []
+newGame :: Game
+newGame = Left (Unfinished [])
+
+--this was failing before I introduced the Either to Game
+--test = whoWon (Unfinished [])
 
 -- applies a move to a game
 -- must only accept unfinished games
-move :: Game -> Position -> Game
-move (Unfinished []) position = Unfinished [(One, position)]
+move :: Unfinished -> Position -> Game
+move (Unfinished []) position = Left (Unfinished [(One, position)])
 move (Unfinished moves@((prevPlayer,_):_)) position =
     case (isFinished (Unfinished moveList)) of
-        True -> Finished moveList
-        False -> Unfinished moveList
+        True -> Right (Finished moveList)
+        False -> Left (Unfinished moveList)
     where
         moveList = ((otherPlayer prevPlayer, position):moves)
 
-isFinished :: Game -> Bool
+isFinished :: Unfinished -> Bool
 isFinished (Unfinished []) = False
 isFinished (Unfinished moves@((player,_):_)) = 
     any (null) (foldl (removeMove) winningPatterns lastPlayersMoves)
@@ -36,12 +44,19 @@ otherPlayer One = Two
 otherPlayer Two = One
 
 -- this should just work on unfinished games
---whoseTurn :: Game -> Player
+whoseTurn :: Unfinished -> Player
+whoseTurn (Unfinished []) = One
+whoseTurn (Unfinished ((player,_):_)) = otherPlayer player
 
 -- this should only work on finished games
-whoWon :: Game -> Player
+whoWon :: Finished -> Player
 whoWon (Finished ((winner,_):_)) = winner
 
---should work on finished and unfinished games
+--should work on finished and unfinished games?
+--does that mean 
+--playerAt::Finished -> Position -> Player
+--and 
+--playerAt::Unfinished -> Position -> Player
+--or
 --playerAt :: Game -> Position -> Player
 
