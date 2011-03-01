@@ -1,3 +1,6 @@
+--Haskell solution to Tony Morris's TicTacToe challenge
+--http://blog.tmorris.net/scala-exercise-with-types-and-abstraction/
+
 data Position = TL | TM | TR | ML | MM | MR | BL | BM | BR 
     deriving (Eq, Show)
 data Player = One | Two 
@@ -5,7 +8,8 @@ data Player = One | Two
 type Move = (Player, Position)
 data Unfinished = Unfinished [Move] deriving Show
 data Finished = Finished [Move] deriving Show
--- this Either is so that move can
+
+-- this Either is so that 'move' can
 -- return a potentially finished game
 type Game = Either Unfinished Finished
 
@@ -31,12 +35,12 @@ newGame = (Unfinished [])
 -- must only accept unfinished games
 move :: Unfinished -> Position -> Game
 move (Unfinished []) position = Left (Unfinished [(One, position)])
-move (Unfinished moves@((prevPlayer,_):_)) position =
-    case (isFinished (Unfinished moveList)) of
-        True -> Right (Finished moveList)
-        False -> Left (Unfinished moveList)
+move game@(Unfinished moves) position
+    | isFinished (Unfinished moveList) = Right (Finished moveList)
+    | otherwise = Left (Unfinished moveList) 
     where
-        moveList = ((otherPlayer prevPlayer, position):moves)
+        player = whoseTurn game
+        moveList = (player, position):moves
 
 isFinished :: Unfinished -> Bool
 isFinished (Unfinished []) = False
@@ -46,15 +50,10 @@ isFinished (Unfinished moves@((player,_):_)) =
         lastPlayersMoves = map (snd) $ filter ((== player) . fst) moves
         removeMove winningMoves move = map (filter (/= move)) winningMoves
 
-otherPlayer :: Player -> Player
-otherPlayer One = Two
-otherPlayer Two = One
-
 findPlayer :: [Move] -> Position -> Maybe Player
-findPlayer moves position = 
-    case (null move) of
-        True -> Nothing
-        False -> Just $ (fst . head) move 
+findPlayer moves position 
+    | null move = Nothing
+    | otherwise = Just $ (fst . head) move 
     where 
         move = filter ((== position) . snd) moves
 
@@ -63,15 +62,11 @@ whoseTurn :: Unfinished -> Player
 whoseTurn (Unfinished []) = One
 whoseTurn (Unfinished ((player,_):_)) = otherPlayer player
 
+otherPlayer :: Player -> Player
+otherPlayer One = Two
+otherPlayer Two = One
+
 -- this should only work on finished games
 whoWon :: Finished -> Player
 whoWon (Finished ((winner,_):_)) = winner
-
---should work on finished and unfinished games?
---does that mean 
---playerAt::Finished -> Position -> Player
---and 
---playerAt::Unfinished -> Position -> Player
---or
---playerAt :: Game -> Position -> Player
 
