@@ -9,13 +9,20 @@ data Finished = Finished [Move] deriving Show
 -- return a potentially finished game
 type Game = Either Unfinished Finished
 
+class TicTacToe a where
+    playerAt :: a -> Position -> Maybe Player
+instance TicTacToe Unfinished where
+    playerAt (Unfinished moves) = findPlayer moves 
+instance TicTacToe Finished where
+    playerAt (Finished moves) = findPlayer moves
+
 winningPatterns :: [[Position]]
 winningPatterns = [[TL,TM, TR], [ML, MM, MR], [BL, BM, BR], 
     [TL, ML, BL], [TM, MM, BM], [TR, MR, BR], [TL, MM, BR],
     [TR, MM, BL]]
 
-newGame :: Game
-newGame = Left (Unfinished [])
+newGame :: Unfinished
+newGame = (Unfinished [])
 
 --this was failing before I introduced the Either to Game
 --test = whoWon (Unfinished [])
@@ -42,6 +49,14 @@ isFinished (Unfinished moves@((player,_):_)) =
 otherPlayer :: Player -> Player
 otherPlayer One = Two
 otherPlayer Two = One
+
+findPlayer :: [Move] -> Position -> Maybe Player
+findPlayer moves position = 
+    case (null move) of
+        True -> Nothing
+        False -> Just $ (fst . head) move 
+    where 
+        move = filter ((== position) . snd) moves
 
 -- this should just work on unfinished games
 whoseTurn :: Unfinished -> Player
