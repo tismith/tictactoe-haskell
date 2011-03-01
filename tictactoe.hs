@@ -10,6 +10,8 @@ winningPatterns = [[TL,TM, TR], [ML, MM, MR], [BL, BM, BR],
     [TL, ML, BL], [TM, MM, BM], [TR, MR, BR], [TL, MM, BR],
     [TR, MM, BL]]
 
+newGame = Unfinished []
+
 -- applies a move to a game
 -- must only accept unfinished games
 move :: Game -> Position -> Game
