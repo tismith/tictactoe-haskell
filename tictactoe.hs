@@ -29,18 +29,23 @@ newGame :: Unfinished
 newGame = (Unfinished [])
 
 --this was failing before I introduced the Either to Game
---test = whoWon (Unfinished [])
+--test = whoWon newGame
 
 -- applies a move to a game
 -- must only accept unfinished games
-move :: Unfinished -> Position -> Game
-move (Unfinished []) position = Left (Unfinished [(One, position)])
+move :: Unfinished -> Position -> Maybe Game
+move (Unfinished []) position = Just $ Left (Unfinished [(One, position)])
 move game@(Unfinished moves) position
-    | isFinished (Unfinished moveList) = Right (Finished moveList)
-    | otherwise = Left (Unfinished moveList) 
+    | not isValid = Nothing
+    | isFinished (Unfinished moveList) = Just $ Right (Finished moveList)
+    | otherwise = Just $ Left (Unfinished moveList) 
     where
+        isValid = validMove game position
         player = whoseTurn game
         moveList = (player, position):moves
+
+validMove :: Unfinished -> Position -> Bool
+validMove (Unfinished moves) position = all ((/= position) . snd) moves
 
 isFinished :: Unfinished -> Bool
 isFinished (Unfinished []) = False
