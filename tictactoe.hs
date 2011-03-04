@@ -36,10 +36,8 @@ playGame game = do
         Just goodGame ->
             case goodGame of
                 Left unfinishedGame ->
-                    do
                     playGame unfinishedGame
                 Right finishedGame ->
-                    do
                     return finishedGame
         Nothing ->
             do
@@ -47,8 +45,7 @@ playGame game = do
             playGame game
 
 invalidMove :: IO ()
-invalidMove = do
-    putStrLn "Invalid move."
+invalidMove = putStrLn "Invalid move."
 
 printValidMoves :: IO ()
 printValidMoves = do
@@ -74,7 +71,6 @@ getPosition = do
                     printValidMoves
                     getPosition
                 Right goodPos ->
-                    do
                     return goodPos
 
 winningPatterns :: [[Position]]
