@@ -1,8 +1,11 @@
 --Haskell solution to Tony Morris's TicTacToe challenge
 --http://blog.tmorris.net/scala-exercise-with-types-and-abstraction/
 
+module Main where 
+import Control.Exception (try, evaluate)
+
 data Position = TL | TM | TR | ML | MM | MR | BL | BM | BR 
-    deriving (Eq, Show)
+    deriving (Eq, Show, Read)
 data Player = One | Two 
     deriving (Eq, Show)
 type Move = (Player, Position)
@@ -20,10 +23,66 @@ instance TicTacToe Unfinished where
 instance TicTacToe Finished where
     playerAt (Finished moves) = findPlayer moves
 
+main :: IO ()
+main = do
+    game <- playGame newGame 
+    print game
+
+playGame :: Unfinished -> IO Finished
+playGame game = do 
+    position <- getPosition
+    let nextGame = move game position
+    case nextGame of
+        Just goodGame ->
+            case goodGame of
+                Left unfinishedGame ->
+                    do
+                    playGame unfinishedGame
+                Right finishedGame ->
+                    do
+                    return finishedGame
+        Nothing ->
+            do
+            invalidMove
+            playGame game
+
+invalidMove :: IO ()
+invalidMove = do
+    putStrLn "Invalid move."
+
+printValidMoves :: IO ()
+printValidMoves = do
+    putStr "Valid moves: "
+    print validMoves
+
+getPosition :: IO Position
+getPosition = do 
+    putStrLn "Please enter move:"
+    rawPos <- try getLine
+    case rawPos of
+        Left e -> 
+            do 
+            putStrLn "Error. "
+            getPosition
+        Right rawPosStr ->
+            do
+            pos <- try $ evaluate $ read rawPosStr
+            case pos of
+                Left e ->
+                    do
+                    putStrLn "Invalid position."
+                    printValidMoves
+                    getPosition
+                Right goodPos ->
+                    do
+                    return goodPos
+
 winningPatterns :: [[Position]]
 winningPatterns = [[TL,TM, TR], [ML, MM, MR], [BL, BM, BR], 
     [TL, ML, BL], [TM, MM, BM], [TR, MR, BR], [TL, MM, BR],
     [TR, MM, BL]]
+validMoves :: [Position]
+validMoves = [TL, TM, TR, ML, MM, MR, BL, BM, BR]
 
 newGame :: Unfinished
 newGame = (Unfinished [])
