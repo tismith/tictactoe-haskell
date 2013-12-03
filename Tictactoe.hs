@@ -2,7 +2,7 @@
 --http://blog.tmorris.net/scala-exercise-with-types-and-abstraction/
 
 module Main where 
-import Control.OldException (try, evaluate)
+import Control.Exception
 
 data Position = TL | TM | TR | ML | MM | MR | BL | BM | BR 
     deriving (Eq, Show, Read, Bounded, Enum)
@@ -81,7 +81,7 @@ getPosition = do
     putStrLn "Please enter move:"
     rawPos <- try getLine
     case rawPos of
-        Left e -> 
+        Left (SomeException e) -> 
             do 
             putStrLn "Error. "
             getPosition
@@ -89,7 +89,7 @@ getPosition = do
             do
             pos <- try $ evaluate $ read rawPosStr
             case pos of
-                Left _ ->
+                Left (SomeException e) ->
                     do
                     putStrLn "Invalid position."
                     printValidMoves
