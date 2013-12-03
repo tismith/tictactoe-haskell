@@ -2,12 +2,12 @@
 --http://blog.tmorris.net/scala-exercise-with-types-and-abstraction/
 
 module Main where 
-import Control.Exception (try, evaluate)
+import Control.OldException (try, evaluate)
 
 data Position = TL | TM | TR | ML | MM | MR | BL | BM | BR 
-    deriving (Eq, Show, Read)
+    deriving (Eq, Show, Read, Bounded, Enum)
 data Player = One | Two 
-    deriving (Eq, Show)
+    deriving (Eq, Show, Bounded, Enum)
 type Move = (Player, Position)
 data Unfinished = Unfinished [Move] deriving Show
 data Finished = Finished [Move] deriving Show
@@ -65,7 +65,7 @@ getPosition = do
             do
             pos <- try $ evaluate $ read rawPosStr
             case pos of
-                Left e ->
+                Left _ ->
                     do
                     putStrLn "Invalid position."
                     printValidMoves
@@ -78,7 +78,7 @@ winningPatterns = [[TL,TM, TR], [ML, MM, MR], [BL, BM, BR],
     [TL, ML, BL], [TM, MM, BM], [TR, MR, BR], [TL, MM, BR],
     [TR, MM, BL]]
 validMoves :: [Position]
-validMoves = [TL, TM, TR, ML, MM, MR, BL, BM, BR]
+validMoves = [minBound .. maxBound]
 
 newGame :: Unfinished
 newGame = (Unfinished [])
