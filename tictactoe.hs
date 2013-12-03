@@ -9,8 +9,8 @@ data Position = TL | TM | TR | ML | MM | MR | BL | BM | BR
 data Player = One | Two 
     deriving (Eq, Show, Bounded, Enum)
 type Move = (Player, Position)
-data Unfinished = Unfinished [Move] deriving Show
-data Finished = Finished [Move] deriving Show
+data Unfinished = Unfinished [Move] 
+data Finished = Finished [Move]
 
 -- this Either is so that 'move' can
 -- return a potentially finished game
@@ -23,17 +23,41 @@ instance TicTacToe Unfinished where
 instance TicTacToe Finished where
     playerAt (Finished moves) = findPlayer moves
 
+instance Show Finished where
+    show (Finished moves) = showBoard moves
+instance Show Unfinished where
+    show (Unfinished moves) = showBoard moves
+
+showBoard :: [Move] -> String
+showBoard moves = 
+        "+---+---+---+\n" ++
+        "| " ++ (showCell TL moves) ++ " | " ++ (showCell TM moves) ++ " | " ++ (showCell TR moves) ++ " |\n" ++
+        "+---+---+---+\n" ++
+        "| " ++ (showCell ML moves) ++ " | " ++ (showCell MM moves) ++ " | " ++ (showCell MR moves) ++ " |\n" ++
+        "+---+---+---+\n" ++
+        "| " ++ (showCell BL moves) ++ " | " ++ (showCell BM moves) ++ " | " ++ (showCell BR moves) ++ " |\n" ++
+        "+---+---+---+\n"
+
+showCell :: Position -> [Move] -> String
+showCell p ms = case (findPlayer ms p) of 
+        Nothing -> " "
+        Just One -> "X"
+        Just Two -> "O"
+
 main :: IO ()
 main = do
     game <- playGame newGame 
+    putStrLn $ "Winner is: " ++ (show $ whoWon game)
     print game
 
 playGame :: Unfinished -> IO Finished
 playGame game = do 
+    print game
     position <- getPosition
     let nextGame = move game position
     case nextGame of
         Just goodGame ->
+	    do 
             case goodGame of
                 Left unfinishedGame ->
                     playGame unfinishedGame
