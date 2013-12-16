@@ -31,11 +31,11 @@ instance Show Unfinished where
 showBoard :: [Move] -> String
 showBoard moves = 
         "+---+---+---+\n" ++
-        "| " ++ (showCell TL moves) ++ " | " ++ (showCell TM moves) ++ " | " ++ (showCell TR moves) ++ " |\n" ++
+        "| " ++ showCell TL moves ++ " | " ++ showCell TM moves ++ " | " ++ showCell TR moves ++ " |\n" ++
         "+---+---+---+\n" ++
-        "| " ++ (showCell ML moves) ++ " | " ++ (showCell MM moves) ++ " | " ++ (showCell MR moves) ++ " |\n" ++
+        "| " ++ showCell ML moves ++ " | " ++ showCell MM moves ++ " | " ++ showCell MR moves ++ " |\n" ++
         "+---+---+---+\n" ++
-        "| " ++ (showCell BL moves) ++ " | " ++ (showCell BM moves) ++ " | " ++ (showCell BR moves) ++ " |\n" ++
+        "| " ++ showCell BL moves ++ " | " ++ showCell BM moves ++ " | " ++ showCell BR moves ++ " |\n" ++
         "+---+---+---+\n"
 
 showCell :: Position -> [Move] -> String
@@ -47,7 +47,7 @@ showCell p ms = case (findPlayer ms p) of
 main :: IO ()
 main = do
     game <- playGame newGame 
-    putStrLn $ "Winner is: " ++ (show $ whoWon game)
+    putStrLn $ "Winner is: " ++ show (whoWon game)
     print game
 
 playGame :: Unfinished -> IO Finished
@@ -57,16 +57,15 @@ playGame game = do
     let nextGame = move game position
     case nextGame of
         Just goodGame ->
-	    do 
             case goodGame of
                 Left unfinishedGame ->
                     playGame unfinishedGame
                 Right finishedGame ->
                     return finishedGame
         Nothing ->
-            do
-            invalidMove
-            playGame game
+	    do 
+            invalidMove 
+	    playGame game
 
 invalidMove :: IO ()
 invalidMove = putStrLn "Invalid move."
@@ -105,7 +104,7 @@ validMoves :: [Position]
 validMoves = [minBound .. maxBound]
 
 newGame :: Unfinished
-newGame = (Unfinished [])
+newGame = Unfinished []
 
 --this was failing before I introduced the Either to Game
 --test = whoWon newGame
@@ -129,9 +128,9 @@ validMove (Unfinished moves) position = all ((/= position) . snd) moves
 isFinished :: Unfinished -> Bool
 isFinished (Unfinished []) = False
 isFinished (Unfinished moves@((player,_):_)) = 
-    any (null) (foldl (removeMove) winningPatterns lastPlayersMoves)
+    any null (foldl removeMove winningPatterns lastPlayersMoves)
     where 
-        lastPlayersMoves = map (snd) $ filter ((== player) . fst) moves
+        lastPlayersMoves = map snd $ filter ((== player) . fst) moves
         removeMove winningMoves move = map (filter (/= move)) winningMoves
 
 findPlayer :: [Move] -> Position -> Maybe Player
