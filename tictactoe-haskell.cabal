@@ -5,8 +5,8 @@ name:                tictactoe-haskell
 version:             0.1.0.0
 -- synopsis:            
 -- description:         
---license:             MIT
---license-file:        LICENSE
+license:             MIT
+license-file:        LICENSE
 author:              Toby Smith
 maintainer:          toby@tismith.id.au
 -- copyright:           

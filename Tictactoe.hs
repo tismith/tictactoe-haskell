@@ -85,15 +85,13 @@ getPosition = do
             putStrLn "Error. "
             getPosition
         Right rawPosStr ->
-            do
-            pos <- try $ evaluate $ read rawPosStr
-            case pos of
-                Left (SomeException e) ->
-                    do
+            case (reads rawPosStr) of
+		[] -> 
+		    do
                     putStrLn "Invalid position."
                     printValidMoves
                     getPosition
-                Right goodPos ->
+                [(goodPos,_)] ->
                     return goodPos
 
 winningPatterns :: [[Position]]
